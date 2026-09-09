@@ -1,0 +1,1079 @@
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Engineering Unit Converter</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #f4f6f8;
+      font-family: Arial, "Noto Sans KR", sans-serif;
+      color: #222;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 30px 15px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 35px;
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #777;
+      margin-bottom: 30px;
+      font-size: 15px;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+      margin-bottom: 30px;
+    }
+
+    .tab {
+      border: none;
+      background: #eef1f4;
+      padding: 13px 8px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .tab:hover {
+      background: #dde3e8;
+    }
+
+    .tab.active {
+      background: #222;
+      color: white;
+    }
+
+    .converter {
+      display: grid;
+      grid-template-columns: 1fr 60px 1fr;
+      gap: 20px;
+      align-items: end;
+    }
+
+    .unit-box {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: bold;
+      color: #555;
+    }
+
+    select,
+    input {
+      width: 100%;
+      height: 52px;
+      border: 1px solid #d5d9dd;
+      border-radius: 10px;
+      padding: 0 14px;
+      font-size: 16px;
+      background: white;
+      outline: none;
+    }
+
+    select:focus,
+    input:focus {
+      border-color: #555;
+    }
+
+    input {
+      font-size: 21px;
+      font-weight: 600;
+    }
+
+    #outputValue {
+      background: #f8f9fa;
+    }
+
+    .swap-button {
+      width: 50px;
+      height: 50px;
+      border: none;
+      border-radius: 50%;
+      background: #222;
+      color: white;
+      font-size: 23px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .swap-button:hover {
+      transform: rotate(180deg);
+      background: #444;
+    }
+
+    .density-box {
+      display: none;
+      margin-top: 25px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 12px;
+    }
+
+    .density-box.active {
+      display: block;
+    }
+
+    .density-box label {
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    .density-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .density-row input {
+      max-width: 250px;
+    }
+
+    .density-unit {
+      font-size: 16px;
+      font-weight: bold;
+      color: #555;
+    }
+
+    .density-note {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #888;
+      line-height: 1.5;
+    }
+
+    .result {
+      margin-top: 30px;
+      padding: 22px;
+      background: #f5f7f9;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .result-title {
+      font-size: 14px;
+      color: #777;
+      margin-bottom: 8px;
+    }
+
+    .result-value {
+      font-size: 23px;
+      font-weight: bold;
+      word-break: break-all;
+    }
+
+    .formula {
+      margin-top: 15px;
+      text-align: center;
+      color: #888;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 760px) {
+      .container {
+        padding: 25px 18px;
+      }
+
+      .tabs {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .converter {
+        grid-template-columns: 1fr;
+      }
+
+      .swap-area {
+        text-align: center;
+      }
+
+      .swap-button {
+        transform: rotate(90deg);
+      }
+
+      .swap-button:hover {
+        transform: rotate(270deg);
+      }
+
+      .density-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .density-row input {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>Unit Converter</h1>
+
+    <div class="subtitle">
+      Engineering Unit Conversion Tool
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-category="length">길이</button>
+      <button class="tab" data-category="pressure">압력</button>
+      <button class="tab" data-category="temperature">온도</button>
+      <button class="tab" data-category="area">면적</button>
+      <button class="tab" data-category="angle">평면각</button>
+      <button class="tab" data-category="flow">질량 유량</button>
+    </div>
+
+    <div class="converter">
+
+      <div class="unit-box">
+        <label>From</label>
+
+        <select id="fromUnit"></select>
+
+        <input
+          type="number"
+          id="inputValue"
+          value="1"
+          step="any"
+          placeholder="값을 입력하세요"
+        />
+      </div>
+
+      <div class="swap-area">
+        <button
+          class="swap-button"
+          id="swapButton"
+          title="단위 교환"
+        >
+          ⇄
+        </button>
+      </div>
+
+      <div class="unit-box">
+        <label>To</label>
+
+        <select id="toUnit"></select>
+
+        <input
+          type="text"
+          id="outputValue"
+          readonly
+        />
+      </div>
+
+    </div>
+
+    <!-- 질량유량 변환용 밀도 입력 -->
+    <div class="density-box" id="densityBox">
+
+      <label for="densityInput">
+        유체 밀도
+      </label>
+
+      <div class="density-row">
+        <input
+          type="number"
+          id="densityInput"
+          value="1000"
+          step="any"
+          min="0"
+        />
+
+        <span class="density-unit">
+          kg/m³
+        </span>
+      </div>
+
+      <div class="density-note">
+        kg/s와 LPM은 서로 다른 종류의 유량 단위이므로
+        변환 시 유체 밀도가 필요합니다.
+      </div>
+
+    </div>
+
+    <div class="result">
+
+      <div class="result-title">
+        Conversion Result
+      </div>
+
+      <div class="result-value" id="resultText">
+        -
+      </div>
+
+    </div>
+
+    <div class="formula" id="formulaText"></div>
+
+  </div>
+
+
+  <script>
+
+    const unitData = {
+
+      length: {
+
+        name: "길이",
+
+        units: {
+
+          cm: {
+            name: "센티미터",
+            symbol: "cm",
+            factor: 0.01
+          },
+
+          m: {
+            name: "미터",
+            symbol: "m",
+            factor: 1
+          },
+
+          mm: {
+            name: "밀리미터",
+            symbol: "mm",
+            factor: 0.001
+          },
+
+          inch: {
+            name: "인치",
+            symbol: "in",
+            factor: 0.0254
+          },
+
+          um: {
+            name: "마이크로미터",
+            symbol: "μm",
+            factor: 1e-6
+          },
+
+          nm: {
+            name: "나노미터",
+            symbol: "nm",
+            factor: 1e-9
+          },
+
+          yard: {
+            name: "야드",
+            symbol: "yd",
+            factor: 0.9144
+          },
+
+          foot: {
+            name: "피트",
+            symbol: "ft",
+            factor: 0.3048
+          }
+
+        },
+
+        defaultFrom: "m",
+        defaultTo: "mm"
+      },
+
+
+      pressure: {
+
+        name: "압력",
+
+        units: {
+
+          atm: {
+            name: "기압",
+            symbol: "atm",
+            factor: 101325
+          },
+
+          bar: {
+            name: "바",
+            symbol: "bar",
+            factor: 100000
+          },
+
+          pa: {
+            name: "파스칼",
+            symbol: "Pa",
+            factor: 1
+          },
+
+          kpa: {
+            name: "킬로파스칼",
+            symbol: "kPa",
+            factor: 1000
+          },
+
+          psi: {
+            name: "PSI",
+            symbol: "psi",
+            factor: 6894.757293168
+          }
+
+        },
+
+        defaultFrom: "kpa",
+        defaultTo: "pa"
+      },
+
+
+      temperature: {
+
+        name: "온도",
+
+        units: {
+
+          celsius: {
+            name: "섭씨",
+            symbol: "°C"
+          },
+
+          kelvin: {
+            name: "켈빈",
+            symbol: "K"
+          },
+
+          fahrenheit: {
+            name: "화씨",
+            symbol: "°F"
+          }
+
+        },
+
+        defaultFrom: "celsius",
+        defaultTo: "kelvin"
+      },
+
+
+      area: {
+
+        name: "면적",
+
+        units: {
+
+          m2: {
+            name: "제곱미터",
+            symbol: "m²",
+            factor: 1
+          },
+
+          cm2: {
+            name: "제곱센티미터",
+            symbol: "cm²",
+            factor: 0.0001
+          },
+
+          ft2: {
+            name: "제곱피트",
+            symbol: "ft²",
+            factor: 0.09290304
+          },
+
+          in2: {
+            name: "제곱인치",
+            symbol: "in²",
+            factor: 0.00064516
+          },
+
+          hectare: {
+            name: "헥타르",
+            symbol: "ha",
+            factor: 10000
+          }
+
+        },
+
+        defaultFrom: "m2",
+        defaultTo: "cm2"
+      },
+
+
+      angle: {
+
+        name: "평면각",
+
+        units: {
+
+          rad: {
+            name: "라디안",
+            symbol: "rad",
+            factor: 1
+          },
+
+          deg: {
+            name: "도",
+            symbol: "°",
+            factor: Math.PI / 180
+          },
+
+          arcmin: {
+            name: "분각",
+            symbol: "arcmin",
+            factor: Math.PI / 10800
+          },
+
+          mrad: {
+            name: "밀리라디안",
+            symbol: "mrad",
+            factor: 0.001
+          }
+
+        },
+
+        defaultFrom: "deg",
+        defaultTo: "rad"
+      },
+
+
+      flow: {
+
+        name: "질량 유량",
+
+        units: {
+
+          kgs: {
+            name: "킬로그램/초",
+            symbol: "kg/s"
+          },
+
+          lpm: {
+            name: "리터/분",
+            symbol: "LPM"
+          }
+
+        },
+
+        defaultFrom: "kgs",
+        defaultTo: "lpm"
+      }
+
+    };
+
+
+    const fromUnit = document.getElementById("fromUnit");
+    const toUnit = document.getElementById("toUnit");
+
+    const inputValue = document.getElementById("inputValue");
+    const outputValue = document.getElementById("outputValue");
+
+    const resultText = document.getElementById("resultText");
+    const formulaText = document.getElementById("formulaText");
+
+    const swapButton = document.getElementById("swapButton");
+
+    const densityBox = document.getElementById("densityBox");
+    const densityInput = document.getElementById("densityInput");
+
+    const tabs = document.querySelectorAll(".tab");
+
+    let currentCategory = "length";
+
+
+    function loadUnits(category) {
+
+      currentCategory = category;
+
+      const data = unitData[category];
+
+      fromUnit.innerHTML = "";
+      toUnit.innerHTML = "";
+
+      Object.entries(data.units).forEach(([key, unit]) => {
+
+        const option1 = document.createElement("option");
+        option1.value = key;
+        option1.textContent = `${unit.name} (${unit.symbol})`;
+
+        const option2 = document.createElement("option");
+        option2.value = key;
+        option2.textContent = `${unit.name} (${unit.symbol})`;
+
+        fromUnit.appendChild(option1);
+        toUnit.appendChild(option2);
+
+      });
+
+      fromUnit.value = data.defaultFrom;
+      toUnit.value = data.defaultTo;
+
+
+      if (category === "flow") {
+        densityBox.classList.add("active");
+      } else {
+        densityBox.classList.remove("active");
+      }
+
+
+      convert();
+
+    }
+
+
+    function convertNormal(value, from, to) {
+
+      const units = unitData[currentCategory].units;
+
+      const baseValue =
+        value * units[from].factor;
+
+      return (
+        baseValue / units[to].factor
+      );
+
+    }
+
+
+    function convertTemperature(value, from, to) {
+
+      let celsius;
+
+      if (from === "celsius") {
+
+        celsius = value;
+
+      }
+
+      else if (from === "kelvin") {
+
+        celsius =
+          value - 273.15;
+
+      }
+
+      else if (from === "fahrenheit") {
+
+        celsius =
+          (value - 32) * 5 / 9;
+
+      }
+
+
+      if (to === "celsius") {
+
+        return celsius;
+
+      }
+
+      else if (to === "kelvin") {
+
+        return (
+          celsius + 273.15
+        );
+
+      }
+
+      else if (to === "fahrenheit") {
+
+        return (
+          celsius * 9 / 5 + 32
+        );
+
+      }
+
+    }
+
+
+    /* =========================================================
+       질량유량 ↔ 체적유량 변환
+       ========================================================= */
+
+    function convertFlow(value, from, to) {
+
+      const density =
+        parseFloat(densityInput.value);
+
+
+      if (
+        isNaN(density) ||
+        density <= 0
+      ) {
+        return NaN;
+      }
+
+
+      /* 같은 단위 */
+      if (from === to) {
+        return value;
+      }
+
+
+      /*
+        kg/s → LPM
+
+        Q [m³/s] = m_dot / density
+
+        1 m³ = 1000 L
+        1 min = 60 s
+
+        따라서
+        LPM = kg/s / density × 60000
+      */
+
+      if (
+        from === "kgs" &&
+        to === "lpm"
+      ) {
+
+        return (
+          value / density * 60000
+        );
+
+      }
+
+
+      /*
+        LPM → kg/s
+
+        kg/s = LPM × density / 60000
+      */
+
+      if (
+        from === "lpm" &&
+        to === "kgs"
+      ) {
+
+        return (
+          value * density / 60000
+        );
+
+      }
+
+    }
+
+
+    function formatNumber(number) {
+
+      if (!Number.isFinite(number)) {
+        return "-";
+      }
+
+      if (number === 0) {
+        return "0";
+      }
+
+      const absolute =
+        Math.abs(number);
+
+      if (
+        absolute >= 1e10 ||
+        absolute < 1e-6
+      ) {
+
+        return number.toExponential(8);
+
+      }
+
+      return Number(
+        number.toPrecision(12)
+      ).toString();
+
+    }
+
+
+    function convert() {
+
+      const value =
+        parseFloat(inputValue.value);
+
+
+      if (isNaN(value)) {
+
+        outputValue.value = "";
+        resultText.textContent = "-";
+        formulaText.textContent = "";
+
+        return;
+      }
+
+
+      const from =
+        fromUnit.value;
+
+      const to =
+        toUnit.value;
+
+
+      let result;
+
+
+      if (
+        currentCategory === "temperature"
+      ) {
+
+        result =
+          convertTemperature(
+            value,
+            from,
+            to
+          );
+
+      }
+
+      else if (
+        currentCategory === "flow"
+      ) {
+
+        result =
+          convertFlow(
+            value,
+            from,
+            to
+          );
+
+      }
+
+      else {
+
+        result =
+          convertNormal(
+            value,
+            from,
+            to
+          );
+
+      }
+
+
+      const formattedResult =
+        formatNumber(result);
+
+
+      outputValue.value =
+        formattedResult;
+
+
+      const fromSymbol =
+        unitData[currentCategory]
+          .units[from].symbol;
+
+      const toSymbol =
+        unitData[currentCategory]
+          .units[to].symbol;
+
+
+      if (!Number.isFinite(result)) {
+
+        resultText.textContent =
+          "유효한 밀도 값을 입력하세요.";
+
+        formulaText.textContent = "";
+
+        return;
+
+      }
+
+
+      resultText.textContent =
+        `${formatNumber(value)} ${fromSymbol} = ${formattedResult} ${toSymbol}`;
+
+
+      updateFormula(
+        value,
+        from,
+        to,
+        result
+      );
+
+    }
+
+
+    function updateFormula(
+      value,
+      from,
+      to,
+      result
+    ) {
+
+      const fromSymbol =
+        unitData[currentCategory]
+          .units[from].symbol;
+
+      const toSymbol =
+        unitData[currentCategory]
+          .units[to].symbol;
+
+
+      if (from === to) {
+
+        formulaText.textContent =
+          "동일한 단위입니다.";
+
+        return;
+      }
+
+
+      if (
+        currentCategory === "temperature"
+      ) {
+
+        formulaText.textContent =
+          `${fromSymbol} → ${toSymbol} 온도 변환`;
+
+        return;
+      }
+
+
+      if (
+        currentCategory === "flow"
+      ) {
+
+        const density =
+          parseFloat(
+            densityInput.value
+          );
+
+
+        if (
+          from === "kgs" &&
+          to === "lpm"
+        ) {
+
+          formulaText.textContent =
+            `LPM = (kg/s ÷ 밀도) × 60000   |   밀도 = ${formatNumber(density)} kg/m³`;
+
+        }
+
+        else if (
+          from === "lpm" &&
+          to === "kgs"
+        ) {
+
+          formulaText.textContent =
+            `kg/s = (LPM × 밀도) ÷ 60000   |   밀도 = ${formatNumber(density)} kg/m³`;
+
+        }
+
+        return;
+      }
+
+
+      const oneUnit =
+        convertNormal(
+          1,
+          from,
+          to
+        );
+
+
+      formulaText.textContent =
+        `1 ${fromSymbol} = ${formatNumber(oneUnit)} ${toSymbol}`;
+
+    }
+
+
+    function swapUnits() {
+
+      const temp =
+        fromUnit.value;
+
+      fromUnit.value =
+        toUnit.value;
+
+      toUnit.value =
+        temp;
+
+      convert();
+
+    }
+
+
+    tabs.forEach(tab => {
+
+      tab.addEventListener(
+        "click",
+        () => {
+
+          tabs.forEach(
+            button =>
+              button.classList.remove(
+                "active"
+              )
+          );
+
+          tab.classList.add(
+            "active"
+          );
+
+          loadUnits(
+            tab.dataset.category
+          );
+
+        }
+      );
+
+    });
+
+
+    inputValue.addEventListener(
+      "input",
+      convert
+    );
+
+
+    densityInput.addEventListener(
+      "input",
+      convert
+    );
+
+
+    fromUnit.addEventListener(
+      "change",
+      convert
+    );
+
+
+    toUnit.addEventListener(
+      "change",
+      convert
+    );
+
+
+    swapButton.addEventListener(
+      "click",
+      swapUnits
+    );
+
+
+    loadUnits("length");
+
+  </script>
+
+</body>
+</html>
+```
